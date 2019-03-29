@@ -1,12 +1,10 @@
 # bicseq2\_pipeline
-<hr>
 
 This pipeline enables you to run bicseq2-norm and bicseq2-seg automatically.
 
-# pre requirements
-<hr>
+# prerequirements
 
-Before you run bicseq2\_pipeline, you have to prepare files pointed below.
+Prepare following files before you run bicseq2\_pipeline.
 + Prepare chromosome file. For detail, see the example directory.
 + Prepare reference files splitted by each chromosome and put them in a directory.
 + Prepare mappability files for each chromosome and put them in a directory.
@@ -50,4 +48,5 @@ Options:
 
 Note:
 	 If you have a control, you must specify to "--control" let BICseq2 know that the data is a case/control study.
+	 Specify aligner you used for mapping as the fourth argument. BWA and Bowtie are supported.
 ```
