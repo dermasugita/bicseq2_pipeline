@@ -11,6 +11,7 @@ Prepare following files before you run bicseq2\_pipeline.
 
 Mappability files should be tab-deliminated and have two columns (start and end position). Raw mappability data is available from [here](https://bismap.hoffmanlab.org/). Determine optimal threshold and fix the file to the required format written before.
 
+# Usage
 ```
 Usage: ./bicseq2_pipeline.sh [option] <chromosome> <path/to/the/reference> <path/to/the/mappability> <BWA|Bowtie> <output_directory> <path/to/the/case/bam> [path/to/the/control/bam]
 
