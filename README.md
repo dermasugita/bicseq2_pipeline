@@ -9,6 +9,9 @@ Prepare following files before you run bicseq2\_pipeline.
 + Prepare reference files splitted by each chromosome and put them in a directory.
 + Prepare mappability files for each chromosome and put them in a directory.
 
+Then install bicseq2-norm and bicseq2-seg from [the official web site](http://compbio.med.harvard.edu/BIC-seq/).
+Please add NBICseq-norm and NBICseq-seg to your PATH.
+
 Mappability files should be tab-deliminated and have two columns (start and end position). Raw mappability data is available from [here](https://bismap.hoffmanlab.org/). Determine optimal threshold and fix the file to the required format written before.
 
 # Installation
