@@ -1,5 +1,7 @@
 # bicseq2_pipeline
-Usage: $command_name [option] <chromosome> <path/to/the/reference> <path/to/the/mappability> <BWA|Bowtie> <output_directory> <path/to/the/case/bam> [path/to/the/control/bam]
+
+```
+Usage: ./bicseq2_pipeline.sh [option] <chromosome> <path/to/the/reference> <path/to/the/mappability> <BWA|Bowtie> <output_directory> <path/to/the/case/bam> [path/to/the/control/bam]
 
 
 Options:
@@ -35,4 +37,4 @@ Options:
 
 Note:
 	 If you have a control, you must specify to "--control" let BICseq2 know that the data is a case/control study.
-
+```
