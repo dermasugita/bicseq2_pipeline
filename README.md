@@ -1,4 +1,17 @@
-# bicseq2_pipeline
+# bicseq2\_pipeline
+<hr>
+
+This pipeline enables you to run bicseq2-norm and bicseq2-seg automatically.
+
+# pre requirements
+<hr>
+
+Before you run bicseq2\_pipeline, you have to prepare files pointed below.
++ Prepare chromosome file. For detail, see the example directory.
++ Prepare reference files splitted by each chromosome and put them in a directory.
++ Prepare mappability files for each chromosome and put them in a directory.
+
+Mappability files should be tab-deliminated and have two columns (start and end position). Raw mappability data is available from [here](https://bismap.hoffmanlab.org/). Determine optimal threshold and fix the file to the required format written before.
 
 ```
 Usage: ./bicseq2_pipeline.sh [option] <chromosome> <path/to/the/reference> <path/to/the/mappability> <BWA|Bowtie> <output_directory> <path/to/the/case/bam> [path/to/the/control/bam]
