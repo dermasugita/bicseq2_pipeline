@@ -50,6 +50,8 @@ EOS
 options_norm=""
 options_seg=""
 control_frag=1
+whole_flag=0
+single_flag=0
 while getopts "hl:s:p:b:-:" opts
 do
 	case $opts in
@@ -58,6 +60,12 @@ do
 				control)
 					options_seg+="--control "
 					control_frag=0
+					;;
+				whole)
+					whole_flag=1
+					;;
+				single)
+					single_flag=1
 					;;
 				gc_bin)
 					options_norm+="--gc_bin "
@@ -176,7 +184,7 @@ function modified_bicseq2-norm() {
 	done < $chromosomes
 	echo 'hello'
 	touch $working_dir/output_file_norm
-	#NBICseq-norm.pl ${options_norm}$working_dir/config_norm $working_dir/output_file_norm
+	NBICseq-norm.pl ${options_norm}$working_dir/config_norm $working_dir/output_file_norm
 
 }
 
