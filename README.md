@@ -14,6 +14,8 @@ Please add NBICseq-norm and NBICseq-seg to your PATH.
 
 Mappability files should be tab-deliminated and have two columns (start and end position). Raw mappability data is available from [here](https://bismap.hoffmanlab.org/). Determine optimal threshold and fix the file to the required format written before.
 
+File names of fasta and mappability should be the same as that in the example/fasta and example/mappability directory.
+
 # Installation
 
 Clone this repository to your favorite directory.
