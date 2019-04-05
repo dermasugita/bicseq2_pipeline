@@ -64,3 +64,19 @@ Note:
 	 If you have a control, you must specify to "--control" let BICseq2 know that the data is a case/control study.
 	 Specify aligner you used for mapping as the fourth argument. BWA and Bowtie are supported.
 ```
+
+<hr>
+
+
+# 概要
+このパイプラインはbicseq2-normとbicseq2-segを自動的に実行します。
+
+# 準備
+bicseq2\_seq2を実行する前に、以下のファイルを準備してください。
+
++ 染色体ファイル（単に染色体名を羅列しただけのファイル）。詳しくはexampleディレクトリを参考にしてください。
++ 染色体ごとのリファレンスファイル
++ 染色体ごとのマッパビリティファイル
+
+マッパビリティファイルは [こちら](https://bismap.hoffmanlab.org/)から入手可能です。元のファイルには、染色体番号・開始・終了・マッパビリティの4カラムあるので、これを適切なマッパビリティを閾値としてフィルターした後、開始・終了の2カラムのみにしてください。
+リファレンスファイルとマッパビリティファイルのファイル名は、example/fasta, example/mappabilityディレクトリにあるのと全く同じファイル名である必要があります。
