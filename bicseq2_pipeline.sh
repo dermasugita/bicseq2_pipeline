@@ -169,19 +169,32 @@ function modified_bicseq2-norm() {
 	fi
 
 
-	# make config file for bicseq2-norm
-	mkdir -p $working_dir/output_norm
 
 	if [ -e $working_dir/config_norm ]; then
 		rm $working_dir/config_norm
 		echo remove config_norm
 	fi
-	touch $working_dir/config_norm
-	echo -e "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" >> $working_dir/config_norm
-	while read -r line
-	do
-		echo -e "${line}\t$reference_dir/${line}.fa\t$mappability_dir/${line}.bedgraph\t$working_dir/seq/${line}.seq\t$working_dir/output_norm/${line}.norm.bin" >> $working_dir/config_norm
-	done < $chromosomes
+	if (( $whole_flag == 1 )); then
+		# make config file for bicseq2-norm
+		mkdir -p $working_dir/output_norm
+		touch $working_dir/config_norm
+		echo -e "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" >> $working_dir/config_norm
+		while read -r line
+		do
+			echo -e "${line}\t$reference_dir/${line}.fa\t$mappability_dir/${line}.bedgraph\t$working_dir/seq/${line}.seq\t$working_dir/output_norm/${line}.norm.bin" >> $working_dir/config_norm
+		done < $chromosomes
+	fi
+	if (( $single_flag == 1 )); then
+		mkdir -p $working_dir/output_norm_single
+		mkdir -p $working_dir/config_norm_single
+		while read -r line
+		do
+			touch $working_dir/config_norm_single/config_norm_${line}
+			echo -e "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" >> $working_dir/config_norm
+			echo -e "${line}\t$reference_dir/${line}.fa\t$mappability_dir/${line}.bedgraph\t$working_dir/seq/${line}.seq\t$working_dir/output_norm_single/${line}.norm.bin" >> $working_dir/config_norm_${line}
+
+		done < $chromosomes
+	fi
 	echo 'hello'
 	touch $working_dir/output_file_norm
 	NBICseq-norm.pl ${options_norm}$working_dir/config_norm $working_dir/output_file_norm
