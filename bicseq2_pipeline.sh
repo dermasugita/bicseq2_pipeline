@@ -211,8 +211,6 @@ function modified_bicseq2-norm() {
 			NBICseq-norm.pl ${options_norm}$working_dir/config_norm_single/config_norm_${line} $working_dir/output_norm_single/output_file_norm_${line}
 		done < $chromosomes
 	fi
-	echo 'hello'
-
 }
 
 mkdir -p $output_dir/case_norm_dir
