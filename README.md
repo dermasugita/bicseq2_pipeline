@@ -5,16 +5,16 @@ This pipeline enables you to run bicseq2-norm and bicseq2-seg automatically.
 # prerequirements
 
 Prepare following files before you run bicseq2\_pipeline.
-+ Prepare chromosome file. For detail, see the example directory.
-+ Prepare reference files splitted by each chromosome and put them in a directory.
-+ Prepare mappability files for each chromosome and put them in a directory.
++ A file containing the chromosome number that you are going to analyse. You can see the exact format going to the example directory.
++ Make a new directory and place reference files split by chromosome there.
++ Make another directory and place mappability files of each chromosome there.
 
 Then install bicseq2-norm and bicseq2-seg from [the official web site](http://compbio.med.harvard.edu/BIC-seq/).
 Please add NBICseq-norm and NBICseq-seg to your PATH.
 
-Mappability files should be tab-deliminated and have two columns (start and end position). Raw mappability data is available from [here](https://bismap.hoffmanlab.org/). Determine optimal threshold and fix the file to the required format written before.
+Mappability files should be tab-deliminated and have two columns (start and end position). Raw mappability data is available [here](https://bismap.hoffmanlab.org/). Determine optimal threshold of mappability and purse it into the required format.
 
-File names of fasta and mappability should be the same as that in the example/fasta and example/mappability directory.
+File names of fasta and mappability should be exactly the same as those in the example/fasta and example/mappability directory.
 
 # Installation
 
@@ -31,6 +31,9 @@ Usage: /pathToTheClonedDirectory/bicseq2_pipeline.sh [option] <chromosome> <path
 
 Options:
 	-h | --help: show this message
+	-q=<int> | --mapping-quality: minimum mapping quality to be considered
+	--whole: Normalize and segment the entire chromosome
+	--single: Perform normalization and segmentation for each chromosome
 
 	for bicseq2-norm:
 
@@ -62,7 +65,7 @@ Options:
 
 Note:
 	 If you have a control, you must specify to "--control" let BICseq2 know that the data is a case/control study.
-	 Specify aligner you used for mapping as the fourth argument. BWA and Bowtie are supported.
+
 ```
 
 <hr>
