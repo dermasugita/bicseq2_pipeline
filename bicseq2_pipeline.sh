@@ -12,6 +12,7 @@ Usage: $command_name [option] <chromosome> <path/to/the/reference> <path/to/the/
 
 Options:
 	-h | --help: show this message
+	-q=<int> | --mapping-quality: minimum mapping quality to be considered
 	--whole: Normalize and segment the entire chromosome
 	--single: Perform normalization and segmentation for each chromosome
 
@@ -51,17 +52,18 @@ EOS
 # parse options
 options_norm=""
 options_seg=""
-control_frag=1
+option_samtools=""
+control_flag=1
 whole_flag=0
 single_flag=0
-while getopts "hl:s:p:b:-:" opts
+while getopts "hl:s:p:b:q:-:" opts
 do
 	case $opts in
 		-)
 			case "${OPTARG}" in
 				control)
 					options_seg+="--control "
-					control_frag=0
+					control_flag=0
 					;;
 				whole)
 					whole_flag=1
@@ -99,23 +101,23 @@ do
 					options_seg+="--$tmp_seg "
 					;;
 				fig_seg=*)
-					fig_segg=`echo $OPTARG | sed -e 's/_seg//g'`
+					fig_seg=`echo $OPTARG | sed -e 's/_seg//g'`
 					options_seg+="--$fig_seg "
 					;;
 				nrm)
-					options_seg+="--nrm"
+					options_seg+="--nrm "
 					;;
 				bootstrap)
-					options_seg+="--bootstrap"
+					options_seg+="--bootstrap "
 					;;
 				noscale)
-					options_seg+="--noscale"
+					options_seg+="--noscale "
 					;;
 				strict)
 					options_seg+="--strict "
 					;;
 				detail)
-					options_seg+="--detail"
+					options_seg+="--detail "
 					;;
 				help)
 					usage
@@ -137,6 +139,9 @@ do
 		p)
 			options_norm+="-p$OPTARG "
 			;;
+		q)
+			option_samtools+="-q$OPTARG "
+			;;
 		b)
 			options_norm+="-b$OPTARG "
 			;;
@@ -146,6 +151,7 @@ done
 shift `expr ${OPTIND} - 1`
 echo $options_norm
 echo $options_seg
+echo $option_samtools
 # arguments
 chromosomes=$1
 reference_dir=$2
@@ -154,7 +160,7 @@ BWAorBowtie=$4
 output_dir=$5
 path_to_the_case_bam=$6
 
-if (( $control_frag == 0 )); then
+if (( $control_flag == 0 )); then
 	path_to_the_control_bam=$7
 	echo you chose case-control analysis!
 else
@@ -171,7 +177,7 @@ function modified_bicseq2-norm() {
 	if [ ! -d $working_dir/seq ]; then
 		mkdir -p $working_dir/seq
 		echo 'start compiling modified samtools.'
-		$script_root/modified_samtools/samtools view -U $BWAorBowtie,$working_dir/seq/,N,N $path_to_the_bam 
+		$script_root/modified_samtools/samtools view -U $BWAorBowtie,$working_dir/seq/,N,N ${option_samtools}$path_to_the_bam 
 	else
 		echo 'seq directory exists. skip modified samtools step.'
 	fi
@@ -200,7 +206,6 @@ function modified_bicseq2-norm() {
 		while read -r line
 		do
 			if [ -e $working_dir/config_norm_single/config_norm_${line} ]; then
-				echo konnitiha
 				rm $working_dir/config_norm_single/config_norm_${line}
 			fi
 
@@ -216,7 +221,7 @@ function modified_bicseq2-norm() {
 mkdir -p $output_dir/case_norm_dir
 modified_bicseq2-norm $output_dir/case_norm_dir $path_to_the_case_bam
 
-if (( $control_frag == 0 )); then
+if (( $control_flag == 0 )); then
 	mkdir -p $output_dir/case_norm_dir
 	modified_bicseq2-norm $output_dir/control_norm_dir $path_to_the_control_bam
 fi
