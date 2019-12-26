@@ -12,6 +12,9 @@ Usage: $command_name [option] <chromosome> <path/to/the/reference> <path/to/the/
 
 Options:
 	-h | --help: show this message
+	-q=<int> | --mapping-quality: minimum mapping quality to be considered
+	--whole: Normalize and segment the entire chromosome
+	--single: Perform normalization and segmentation for each chromosome
 
 	for bicseq2-norm:
 
@@ -49,17 +52,18 @@ EOS
 # parse options
 options_norm=""
 options_seg=""
-control_frag=1
+option_samtools=""
+control_flag=1
 whole_flag=0
 single_flag=0
-while getopts "hl:s:p:b:-:" opts
+while getopts "hl:s:p:b:q:-:" opts
 do
 	case $opts in
 		-)
 			case "${OPTARG}" in
 				control)
 					options_seg+="--control "
-					control_frag=0
+					control_flag=0
 					;;
 				whole)
 					whole_flag=1
@@ -77,37 +81,43 @@ do
 					options_norm+="--bin_only "
 					;;
 				fig_norm=*)
-					options_norm+="--${OPTARG} "
+					fig_norm=`echo $OPTARG | sed -e 's/_norm//g'`
+					echo $fig_norm
+					options_norm+="--$fig_norm "
 					;;
 				title_norm=*)
-					options_norm+="--${OPTARG} "
+					title_norm=`echo $OPTARG | sed -e 's/_norm//g'`
+					options_norm+="--$title_norm "
 					;;
 				tmp_norm=*)
-					options_norm+="--${OPTARG} "
+					tmp_norm=`echo $OPTARG | sed -e 's/_norm//g'`
+					options_norm+="--$tmp_norm "
 					;;
 				lambda=*)
 					options_seg+="--${OPTARG} "
 					;;
 				tmp_seg=*)
-					options_seg+="--${OPTARG} "
+					tmp_seg=`echo $OPTARG | sed -e 's/_seg//g'`
+					options_seg+="--$tmp_seg "
 					;;
 				fig_seg=*)
-					options_seg+="--${OPTARG} "
+					fig_seg=`echo $OPTARG | sed -e 's/_seg//g'`
+					options_seg+="--$fig_seg "
 					;;
 				nrm)
-					options_seg+="--nrm"
+					options_seg+="--nrm "
 					;;
 				bootstrap)
-					options_seg+="--bootstrap"
+					options_seg+="--bootstrap "
 					;;
 				noscale)
-					options_seg+="--noscale"
+					options_seg+="--noscale "
 					;;
 				strict)
 					options_seg+="--strict "
 					;;
 				detail)
-					options_seg+="--detail"
+					options_seg+="--detail "
 					;;
 				help)
 					usage
@@ -129,6 +139,9 @@ do
 		p)
 			options_norm+="-p$OPTARG "
 			;;
+		q)
+			option_samtools+="-q$OPTARG "
+			;;
 		b)
 			options_norm+="-b$OPTARG "
 			;;
@@ -138,6 +151,7 @@ done
 shift `expr ${OPTIND} - 1`
 echo $options_norm
 echo $options_seg
+echo $option_samtools
 # arguments
 chromosomes=$1
 reference_dir=$2
@@ -146,7 +160,7 @@ BWAorBowtie=$4
 output_dir=$5
 path_to_the_case_bam=$6
 
-if (( $control_frag == 0 )); then
+if (( $control_flag == 0 )); then
 	path_to_the_control_bam=$7
 	echo you chose case-control analysis!
 else
@@ -163,35 +177,51 @@ function modified_bicseq2-norm() {
 	if [ ! -d $working_dir/seq ]; then
 		mkdir -p $working_dir/seq
 		echo 'start compiling modified samtools.'
-		$script_root/modified_samtools/samtools view -U $BWAorBowtie,$working_dir/seq/,N,N $path_to_the_bam 
+		$script_root/modified_samtools/samtools view -U $BWAorBowtie,$working_dir/seq/,N,N ${option_samtools}$path_to_the_bam 
 	else
 		echo 'seq directory exists. skip modified samtools step.'
 	fi
 
 
-	# make config file for bicseq2-norm
-	mkdir -p $working_dir/output_norm
 
 	if [ -e $working_dir/config_norm ]; then
 		rm $working_dir/config_norm
 		echo remove config_norm
 	fi
-	touch $working_dir/config_norm
-	echo -e "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" >> $working_dir/config_norm
-	while read -r line
-	do
-		echo -e "${line}\t$reference_dir/${line}.fa\t$mappability_dir/${line}.bedgraph\t$working_dir/seq/${line}.seq\t$working_dir/output_norm/${line}.norm.bin" >> $working_dir/config_norm
-	done < $chromosomes
-	echo 'hello'
-	touch $working_dir/output_file_norm
-	NBICseq-norm.pl ${options_norm}$working_dir/config_norm $working_dir/output_file_norm
+	if (( $whole_flag == 1 )); then
+		# make config file for bicseq2-norm
+		mkdir -p $working_dir/output_norm
+		touch $working_dir/config_norm
+		echo -e "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" >> $working_dir/config_norm
+		while read -r line
+		do
+			echo -e "${line}\t$reference_dir/${line}.fa\t$mappability_dir/${line}.bedgraph\t$working_dir/seq/${line}.seq\t$working_dir/output_norm/${line}.norm.bin" >> $working_dir/config_norm
+		done < $chromosomes
+		touch $working_dir/output_file_norm
+		NBICseq-norm.pl ${options_norm}$working_dir/config_norm $working_dir/output_file_norm
+	fi
+	if (( $single_flag == 1 )); then
+		mkdir -p $working_dir/output_norm_single
+		mkdir -p $working_dir/config_norm_single
+		while read -r line
+		do
+			if [ -e $working_dir/config_norm_single/config_norm_${line} ]; then
+				rm $working_dir/config_norm_single/config_norm_${line}
+			fi
 
+			touch $working_dir/config_norm_single/config_norm_${line}
+			touch $working_dir/output_norm_single/output_file_norm_${line}
+			echo -e "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" >> $working_dir/config_norm_single/config_norm_${line}
+			echo -e "${line}\t$reference_dir/${line}.fa\t$mappability_dir/${line}.bedgraph\t$working_dir/seq/${line}.seq\t$working_dir/output_norm_single/${line}.norm.bin" >> $working_dir/config_norm_single/config_norm_${line}
+			NBICseq-norm.pl ${options_norm}$working_dir/config_norm_single/config_norm_${line} $working_dir/output_norm_single/output_file_norm_${line}
+		done < $chromosomes
+	fi
 }
 
 mkdir -p $output_dir/case_norm_dir
 modified_bicseq2-norm $output_dir/case_norm_dir $path_to_the_case_bam
 
-if (( $control_frag == 0 )); then
+if (( $control_flag == 0 )); then
 	mkdir -p $output_dir/case_norm_dir
 	modified_bicseq2-norm $output_dir/control_norm_dir $path_to_the_control_bam
 fi
@@ -200,16 +230,34 @@ fi
 
 
 # bicseq2-seg
-if [ -e $output_dir/config_seg ]; then
-	rm $output_dir/config_seg
+if (( $whole_flag == 1 )); then
+	if [ -e $output_dir/config_seg ]; then
+		rm $output_dir/config_seg
+	fi
+
+	touch $output_dir/config_seg
+	echo -e "chromName\tbinFileNorm.Case\tbinFileNorm.Control" >> $output_dir/config_seg
+	while read -r line
+	do
+		echo -e "${line}\t$output_dir/case_norm_dir/output_norm/${line}.norm.bin\t$output_dir/control_norm_dir/output_norm/${line}.norm.bin" >> $output_dir/config_seg
+	done < $chromosomes
+
+	touch $output_dir/output_seg
+	NBICseq-seg.pl ${options_seg}$output_dir/config_seg $output_dir/output_seg
 fi
-
-touch $output_dir/config_seg
-echo -e "chromName\tbinFileNorm.Case\tbinFileNorm.Control" >> $output_dir/config_seg
-while read -r line
-do
-	echo -e "${line}\t$output_dir/case_norm_dir/output_norm/${line}.norm.bin\t$output_dir/control_norm_dir/output_norm/${line}.norm.bin" >> $output_dir/config_seg
-done < $chromosomes
-
-touch $output_dir/output_seg
-NBICseq-seg.pl ${options_seg}$output_dir/config_seg $output_dir/output_seg
+if (( $single_flag == 1 )); then
+	mkdir -p $output_dir/config_seg_single
+	mkdir -p $output_dir/output_seg_single
+	while read -r line
+	do
+		if [ -e $output_dir/config_seg_single/config_seg_${line} ]; then
+			echo 'remove'
+			rm $output_dir/config_seg_single/config_seg_${line}
+		fi
+		touch $output_dir/cofig_seg_single/config_seg_${line}
+		echo -e "chromName\tbinFileNorm.Case\tbinFileNorm.Control" >> $output_dir/config_seg_single/config_seg_${line}
+		echo -e "${line}\t$output_dir/case_norm_dir/output_norm_single/${line}.norm.bin\t$output_dir/control_norm_dir/output_norm_single/${line}.norm.bin" >> $output_dir/config_seg_single/config_seg_${line}
+		touch $output_dir/output_seg_single/output_seg_${line}
+		NBICseq-seg.pl ${options_seg}$output_dir/config_seg_single/config_seg_${line} $output_dir/output_seg_single/output_seg_${line}
+	done < $chromosomes
+fi
